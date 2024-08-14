@@ -1,0 +1,1442 @@
+openapi: '3.0.3'
+info:
+  title: CRM Pague Menos API Documentation
+  version: '3.0'
+  description: This API provides access to the CRM system of Pague Menos Supermarket. It allows integration with various CRM functionalities such as customer data management, loyalty program operations, order tracking, and promotions. The API facilitates seamless communication between the supermarket's CRM and external applications.
+  contact:
+    name: Gabriel Santichio
+    email: gabriel@supermercadospaguemenos.com.br
+    url: https://superpaguemenos.com.br
+  license:
+    name: Its company property
+servers:
+  - url: http://localhost:80
+    description: Development server
+  - url: https://hml-crm.superpaguemenos.com.br
+    description: Homologation server
+  - url: https://api-crm.superpaguemenos.com.br
+    description: Production server
+tags:
+  - name: iam
+    description: Operations related to identity and access management
+  - name: customer
+    description: Operations related to customer data and management
+  - name: shop
+    description: Operations related to shopping and orders
+  - name: product
+    description: Operations related to product information and management
+  - name: tabloid
+    description: Operations related to promotions and advertisements
+  - name: communication
+    description: Operations related to customer communication.
+paths:
+  /auth:
+    post:
+      tags:
+        - iam
+      summary: Authenticate user with a password
+      description: Authenticates a user using their email or CPF (Cadastro de Pessoas Físicas - Brazilian individual taxpayer registry identification) and returns a JWT access token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                identification:
+                  type: string
+                  description: The user's email or CPF
+                password:
+                  type: string
+                  description: The user's password
+              required:
+                - identification
+                - password
+            example:
+              identification: joao.pereira@outlook.com
+              password: senha@supersecreta123
+      responses:
+        '200':
+          description: Successful authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    description: HTTP status code
+                  message:
+                    type: string
+                    description: Status message
+                  timestamp:
+                    type: string
+                    description: Time of the response
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        description: JWT access token
+              example:
+                statusCode: 200
+                message: User successfuly authenticated!
+                timestamp: '2024-08-13T20:43:20.126Z'
+                data:
+                  token: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+        '400':
+          $ref: '#/components/responses/invalidRequest400'
+        '401':
+          $ref: '#/components/responses/unauthorized401'
+        '404':
+          $ref: '#/components/responses/notFound404'
+        '500':
+          $ref: '#/components/responses/internal500'
+  /auth2:
+    post:
+      tags:
+        - iam
+      summary: Send a code to authenticate a user
+      description: Authenticates a user using their email or CPF (Cadastro de Pessoas Físicas - Brazilian individual taxpayer registry identification) and sends a e-mail or sms to the customer with the code.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                identification:
+                  type: string
+                  description: The user's email or CPF
+              required:
+                - identification
+            example:
+              identification: joao.pereira@outlook.com
+      responses:
+        '200':
+          description: Successful send the code
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    description: HTTP status code
+                  message:
+                    type: string
+                    description: Status message
+                  timestamp:
+                    type: string
+                    description: Time of the response
+              example:
+                statusCode: 200
+                message: Verification code sent successfuly!
+                timestamp: '2024-08-13T20:43:20.126Z'
+        '400':
+          $ref: '#/components/responses/invalidRequest400'
+        '401':
+          $ref: '#/components/responses/unauthorized401'
+        '404':
+          $ref: '#/components/responses/notFound404'
+        '500':
+          $ref: '#/components/responses/internal500'
+  /auth2/verify:
+    post:
+      tags:
+        - iam
+      summary: Verify and authenticate the user
+      description: Authenticates a user using the provided code and returns a JWT access token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                identification:
+                  type: string
+                  description: The user's email or CPF
+                code:
+                  type: string
+                  description: The user's sent code
+              required:
+                - identification
+                - code
+            example:
+              identification: joao.pereira@gmail.com
+              code: '123456'
+      responses:
+        '200':
+          description: Successful authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    description: HTTP status code
+                  message:
+                    type: string
+                    description: Status message
+                  timestamp:
+                    type: string
+                    description: Time of the response
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        description: JWT access token
+              example:
+                statusCode: 200
+                message: User successfuly authenticated!
+                timestamp: '2024-08-13T20:43:20.126Z'
+                data:
+                  token: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+        '400':
+          $ref: '#/components/responses/invalidRequest400'
+        '401':
+          $ref: '#/components/responses/unauthorized401'
+        '404':
+          $ref: '#/components/responses/notFound404'
+        '500':
+          $ref: '#/components/responses/internal500'
+  /auth/refresh:
+    post:
+      tags:
+        - iam
+      summary: Refresh user token
+      description: Refresh the JWT token, with a longer TTL (Time To Leave) based on the actual token.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: token
+          in: header
+          description: JWT token retrieve by the auth.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    description: HTTP status code
+                  message:
+                    type: string
+                    description: Status message
+                  timestamp:
+                    type: string
+                    description: Time of the response
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        description: JWT access token
+              example:
+                statusCode: 200
+                message: Token de usuario atualizado com sucesso!
+                timestamp: '2024-08-13T20:43:20.126Z'
+                data:
+                  token: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+        '400':
+          $ref: '#/components/responses/invalidRequest400'
+        '500':
+          $ref: '#/components/responses/internal500'
+  /auth/guest:
+    post:
+      tags:
+        - iam
+      summary: Register a guest in database
+      description: Register the guest in a table in database.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                deviceId:
+                  type: string
+                  description: A unique device property
+            example:
+              deviceId: f47ac10b-58cc-4372-a567-0e02b2c3d479
+      responses:
+        '200':
+          description: Successful authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    description: HTTP status code
+                  message:
+                    type: string
+                    description: Status message
+                  timestamp:
+                    type: string
+                    description: Time of the response
+              example:
+                statusCode: 200
+                message: User successfuly authenticated!
+                timestamp: '2024-08-13T20:43:20.126Z'
+        '400':
+          $ref: '#/components/responses/invalidRequest400'
+        '401':
+          $ref: '#/components/responses/unauthorized401'
+        '404':
+          $ref: '#/components/responses/notFound404'
+        '500':
+          $ref: '#/components/responses/internal500'
+  /customer:
+    post:
+      tags:
+        - customer
+      summary: Register a new customer
+      description: Registers a new customer with all the required details.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewCustomer'
+            example:
+              name: Jose Pereira
+              cpf: '000.000.000-00'
+              birthday: '2001-01-25T00:00:00.000Z'
+              gender: male
+              phone: '19991234567'
+              address:
+                zipCode: '12345-678'
+                street: Av. Brasil
+                number: '1204'
+                complement: 'Apto 5'
+                neighborhood: Jardins
+                city: Santa Barbara d'Oeste
+                state: SP
+              profile:
+                photoUrl: http://google.imagens/04vh3t07y8930789yhc9478c8
+                displayName: Joao
+                username: joaozinho
+                email: joao.pereira@gmail.com
+                password: senha@supersecreta123
+              terms: 
+                clubRegulations: true
+                termOfCommitment: true
+                privacyPolicy: true
+                optOutSms: true
+                optOutEmail: true
+                optOutApp: true
+      responses:
+        '200':
+          description: Successful registration of a new customer
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    description: HTTP status code
+                  message:
+                    type: string
+                    description: Status message
+                  timestamp:
+                    type: string
+                    description: Time of the response
+              example: 
+                statusCode: 201
+                message: Cliente cadastrado com sucesso!
+                timestamp: '2024-08-13T20:43:20.126Z'
+        '400':
+          $ref: '#/components/responses/invalidRequest400'
+        '401':
+          $ref: '#/components/responses/unauthorized401'
+        '409':
+          $ref: '#/components/responses/conflict409'
+        '500':
+          $ref: '#/components/responses/internal500'
+  /customer/{id}:
+    get:
+      tags:
+        - customer
+      summary: Retrieve customer data
+      description: Retrieves the data of a customer by the provided ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the customer to retrieve
+      responses:
+        '200':
+          description: Successful retrieval of customer data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    description: HTTP status code
+                  message:
+                    type: string
+                    description: Status message
+                  timestamp:
+                    type: string
+                    description: Time of the response
+                  meta:
+                    type: object
+                    properties:
+                      limit:
+                        type: integer
+                        description: Limit for pagination (if applicable)
+                      offset:
+                        type: integer
+                        description: Offset for pagination (if applicable)
+                  data:
+                    $ref: '#/components/schemas/Customer'
+              example:
+                statusCode: 200
+                message: Listando cliente!
+                timestamp: '2024-08-13T20:43:20.126Z'
+                data:
+                  id: 8742 
+                  name: Jose Pereira
+                  cpf: '000.000.000-00'
+                  birthday: '2001-01-25T00:00:00.000Z'
+                  gender: male
+                  phone: '19991234567'
+                  address:
+                    zipCode: '12345-678'
+                    street: Av. Brasil
+                    number: '1204'
+                    complement: 'Apto 5'
+                    neighborhood: Jardins
+                    city: Santa Barbara d'Oeste
+                    state: SP
+                  profile:
+                    photoUrl: http://google.imagens/04vh3t07y8930789yhc9478c8
+                    displayName: Joao
+                    username: joaozinho
+                    email: joao.pereira@gmail.com
+                  terms: 
+                    clubRegulations: true
+                    termOfCommitment: true
+                    privacyPolicy: true
+                    optOutSms: true
+                    optOutEmail: true
+                    optOutApp: true
+        '400':
+          $ref: '#/components/responses/invalidRequest400'
+        '401':
+          $ref: '#/components/responses/unauthorized401'
+        '404':
+          $ref: '#/components/responses/notFound404'
+        '500':
+          $ref: '#/components/responses/internal500'
+    put:
+      tags:
+        - customer
+      summary: Update customer data
+      description: Updates all data of a customer by the provided ID, and returns the updated customer.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the customer to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+            example:
+              name: Jose Pereira
+              cpf: '000.000.000-00'
+              birthday: '2001-01-25T00:00:00.000Z'
+              gender: male
+              phone: '19991234567'
+              address:
+                zipCode: '12345-678'
+                street: Av. Brasil
+                number: '1204'
+                complement: 'Apto 5'
+                neighborhood: Jardins
+                city: Santa Barbara d'Oeste
+                state: SP
+              profile:
+                photoUrl: http://google.imagens/04vh3t07y8930789yhc9478c8
+                displayName: Joao
+                username: joaozinho
+                email: joao.pereira@gmail.com
+                password: senha@supersecreta123
+              terms: 
+                clubRegulations: true
+                termOfCommitment: true
+                privacyPolicy: true
+                optOutSms: true
+                optOutEmail: true
+                optOutApp: true
+      responses:
+        '204':
+          description: Successful update of customer data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    description: HTTP status code
+                  message:
+                    type: string
+                    description: Status message
+                  timestamp:
+                    type: string
+                    description: Time of the response
+              example:
+                statusCode: 204
+                message: Cliente atualizado por completo com sucesso!
+                timestamp: '2024-08-13T20:43:20.126Z'
+        '400':
+          $ref: '#/components/responses/invalidRequest400'
+        '401':
+          $ref: '#/components/responses/unauthorized401'
+        '404':
+          $ref: '#/components/responses/notFound404'
+        '500':
+          $ref: '#/components/responses/internal500'
+
+    patch:
+      tags:
+        - customer
+      summary: Partially update customer data
+      description: Partially updates the data of a customer by the provided ID, and returns the updated customer.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the customer to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Customer"
+            example: 
+              profile:
+                photoUrl: http://google.imagens/04vh307y8379hadge4r93h78
+                displayName: Joaozin
+      responses:
+        '204':
+          description: Successful partial update of customer data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    description: HTTP status code
+                  message:
+                    type: string
+                    description: Status message
+                  timestamp:
+                    type: string
+                    description: Time of the response
+                  data:
+                    $ref: '#/components/schemas/Customer'
+              example:
+                statusCode: 204
+                message: Campos do cliente atualizado com sucesso!
+                timestamp: '2024-08-13T20:43:20.126Z'
+        '400':
+          $ref: '#/components/responses/invalidRequest400'
+        '401':
+          $ref: '#/components/responses/unauthorized401'
+        '404':
+          $ref: '#/components/responses/notFound404'
+        '500':
+          $ref: '#/components/responses/internal500'
+
+  /customer/check:
+    post:
+      tags:
+        - customer
+      summary: Check customer status
+      description: Checks if the user exists, needs registration, or requires profile completion.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cpf:
+                  type: string
+                  description: Customer CPF
+              required:
+                - cpf
+            example: 
+              cpf: '000.000.000-00'
+      responses:
+        '200':
+          description: Successful customer status check
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    description: HTTP status code
+                  message:
+                    type: string
+                    description: Status message
+                  timestamp:
+                    type: string
+                    description: Time of the response
+                  data:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        enum:
+                          - to_register
+                          - to_complete
+                          - registered
+                        description: Customer status
+              example: 
+                statusCode: 200
+                message: Cliente validado com sucesso!
+                timestamp: '2024-08-13T20:43:20.126Z'
+                data: 
+                  status: to_register
+        '400':
+          $ref: '#/components/responses/invalidRequest400'
+        '401':
+          $ref: '#/components/responses/unauthorized401'
+        '404':
+          $ref: '#/components/responses/notFound404'
+        '500':
+          $ref: '#/components/responses/internal500'
+  /customer/forget:
+    post:
+      tags:
+        - customer
+      summary: Reset customer password
+      description: Resets the customer password using the provided email or CPF.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                identification:
+                  type: string
+                  description: The customer's email or CPF
+              required:
+                - identification
+            example: 
+              identification: 'joao.pereira@gmail.com'
+      responses:
+        '204':
+          description: Successful sent verification e-mail.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    description: HTTP status code
+                  message:
+                    type: string
+                    description: Status message
+                  timestamp:
+                    type: string
+                    description: Time of the response
+              example:
+                statusCode: 200
+                message: E-mail de alteracao de senha enviado com sucesso!
+                timestamp: '2024-08-13T20:43:20.126Z'
+        '400':
+          $ref: '#/components/responses/invalidRequest400'
+        '401':
+          $ref: '#/components/responses/unauthorized401'
+        '404':
+          $ref: '#/components/responses/notFound404'
+        '500':
+          $ref: '#/components/responses/internal500'
+  /customer/savings/{id}:
+    get:
+      tags:
+        - customer
+      summary: Retrieve customer savings
+      description: Returns the total savings of a customer by the provided ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the customer to retrieve savings for
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+          description: Number of records to be listed
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+          description: Number of records to skip for pagination
+        - name: groupBy
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - year
+              - month
+              - day
+          description: How the query will be grouped
+      responses:
+        '200':
+          description: Successful retrieval of customer savings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    description: HTTP status code
+                  message:
+                    type: string
+                    description: Status message
+                  timestamp:
+                    type: string
+                    description: Time of the response
+                  data:
+                    type: object
+                    properties:
+                      savings:
+                        type: number
+                        description: Total savings of the customer
+              example: 
+                statusCode: 200
+                message: Listando economias do cliente!
+                timestamp: '2024-08-13T20:43:20.126Z'
+                data: 
+                  total: 135.34
+                  date: 2024
+                  window: 
+                    from: '2024-08-13T20:43:20.126Z'
+                    to: '2024-08-13T20:43:20.126Z'
+                  dayByDay:
+                    - day: '2024-08-13T20:43:20.126Z'
+                      total: 14.32
+                      cupons: 1
+                    - day: '2024-08-13T20:43:20.126Z'
+                      total: 14.32
+                      cupons: 1
+                    - day: '2024-08-13T20:43:20.126Z'
+                      total: 14.32
+                      cupons: 1
+                    - day: '2024-08-13T20:43:20.126Z'
+                      total: 14.32
+                      cupons: 1
+                    - day: '2024-08-13T20:43:20.126Z'
+                      total: 14.32
+                      cupons: 1
+        '400':
+          $ref: '#/components/responses/invalidRequest400'
+        '401':
+          $ref: '#/components/responses/unauthorized401'
+        '404':
+          $ref: '#/components/responses/notFound404'
+        '500':
+          $ref: '#/components/responses/internal500'
+  /product/offers:
+    get:
+      tags:
+        - product
+      summary: Retrieve products of a offer
+      description: Retrieves products based on offers with pagination and filters.
+      parameters:
+        - name: offer
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Offer group
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+          description: Number of records to be listed
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+          description: Number of records to skip for pagination
+      responses:
+        '200':
+          description: Successful retrieval of products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    description: HTTP status code
+                  message:
+                    type: string
+                    description: Status message
+                  timestamp:
+                    type: string
+                    description: Time of the response
+                  meta:
+                    type: object
+                    properties:
+                      limit:
+                        type: integer
+                        description: Number of records listed
+                      offset:
+                        type: integer
+                        description: Number of records skipped for pagination
+                      total:
+                        type: integer
+                        description: Total number of products available
+                      parameters:
+                        type: object
+                        description: The parameters selected in the request
+                        properties:
+                          offer: 
+                            type: string
+                            description: The offer group selected
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+              example:
+                statusCode: 200
+                message: Listando materiais
+                timestamp: '2024-08-13T20:43:20.126Z'
+                meta:
+                  limit: 1
+                  offset: 1
+                  total: 1000
+                  parameters:
+                    offer: bananas
+                data:
+                - id-product: 9999
+                  code: 7899999999999
+                  description: Banana Nanica KG
+                  category:
+                    code: 99
+                    description: Hortifrúti
+                  type-offer: clube
+                  price:
+                    from: 9.99
+                    to: 6.99
+                  offer-date:
+                    from: "2001-01-25T00:00:00.000Z"
+                    to: "2001-01-26T00:00:00.000Z"
+                  discount: 35
+                  before-page: 1
+                  page: 2
+                  after-page: 3
+        '400':
+          $ref: '#/components/responses/invalidRequest400'
+        '404':
+          $ref: '#/components/responses/notFound404'
+        '500':
+          $ref: '#/components/responses/internal500'
+  /product/offers/{customerId}:
+    get:
+      tags:
+        - product
+      summary: Retrieve custom products for specified customer
+      description: Retrieves products based on offers with pagination and filters.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Customer ID for custom offers
+        - name: offer
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Offer group
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+          description: Number of records to be listed
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+          description: Number of records to skip for pagination
+      responses:
+        '200':
+          description: Successful retrieval of products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    description: HTTP status code
+                  message:
+                    type: string
+                    description: Status message
+                  timestamp:
+                    type: string
+                    description: Time of the response
+                  meta:
+                    type: object
+                    properties:
+                      limit:
+                        type: integer
+                        description: Number of records listed
+                      offset:
+                        type: integer
+                        description: Number of records skipped for pagination
+                      total:
+                        type: integer
+                        description: Total number of products available
+                      parameters:
+                        type: object
+                        description: The parameters selected in the request
+                        properties:
+                          offer: 
+                            type: string
+                            description: The offer group selected
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+              example:
+                statusCode: 200
+                message: Listando materiais
+                timestamp: '2024-08-13T20:43:20.126Z'
+                meta:
+                  limit: 1
+                  offset: 1
+                  total: 1000
+                  parameters:
+                    offer: bananas
+                data:
+                - idProduct: 9999
+                  code: 7899999999999
+                  description: Banana Nanica KG
+                  category:
+                    code: 99
+                    description: Hortifrúti
+                  typeOffer: clube
+                  price:
+                    from: 9.99
+                    to: 6.99
+                  offerDate:
+                    from: "2001-01-25T00:00:00.000Z"
+                    to: "2001-01-26T00:00:00.000Z"
+                  discount: 35
+        '400':
+          $ref: '#/components/responses/invalidRequest400'
+        '401':
+          $ref: '#/components/responses/unauthorized401'
+        '404':
+          $ref: '#/components/responses/notFound404'
+        '500':
+          $ref: '#/components/responses/internal500'
+  /product/detail/{id}:
+    get:
+      tags:
+        - product
+      summary: Retrieve product details
+      description: Retrieves detailed information of a product by the provided ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the product to retrieve
+      responses:
+        '200':
+          description: Successful retrieval of product details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    description: HTTP status code
+                  message:
+                    type: string
+                    description: Status message
+                  timestamp:
+                    type: string
+                    description: Time of the response
+                  data:
+                    $ref: '#/components/schemas/Product'
+              example:
+                statusCode: 200
+                message: Listando produto
+                timestamp: '2024-08-13T20:43:20.126Z'
+                data:
+                  idProduct: 9999
+                  code: 7899999999999
+                  description: Banana Nanica KG
+                  category:
+                      code: 99
+                      description: Hortifrúti
+                  typeOffer: clube
+                  price:
+                      from: 9.99
+                      to: 6.99
+                  offerDate:
+                      from: "2001-01-25T00:00:00.000Z"
+                      to: "2001-01-26T00:00:00.000Z"
+                  discount: 35
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      description: Authenticate by a token in header.
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    invalidRequest400:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                description: HTTP status code
+              error:
+                type: string
+                description: Server error message
+              message:
+                type: string
+                description: Error message
+              timestamp:
+                type: string
+                description: Time of the response
+          example:
+            statusCode: 400
+            error: Invalid request parameters
+            message: Algun valor info
+            timestamp: 2024-08-05 14:00:00:00
+    unauthorized401:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                description: HTTP status code
+              error:
+                type: string
+                description: Server error message
+              message:
+                type: string
+                description: Error message
+              timestamp:
+                type: string
+                description: Time of the response
+          example:
+                statusCode: 401
+                error: Unauthorized!
+                message: Acesso nao autorizado!
+                timestamp: 2024-08-05 14:00:00:00
+    notFound404:
+          description: Not found request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    description: HTTP status code
+                  error:
+                    type: string
+                    description: Server error message
+                  message:
+                    type: string
+                    description: Error message
+                  timestamp:
+                    type: string
+                    description: Time of the response
+              example:
+                statusCode: 404
+                error: Not found!
+                message: Cliente nao encontrado!
+                timestamp: 2024-08-05 14:00:00:00
+    conflict409:
+      description: Conflict database error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                description: HTTP status code
+              error:
+                type: string
+                description: Server error message
+              message:
+                type: string
+                description: Error message
+              timestamp:
+                type: string
+                description: Time of the response
+          example:
+            statusCode: 409
+            error: Conflict in database!
+            message: Ja existe um cliente cadastrado!
+            timestamp: 2024-08-05 14:00:00:00
+    internal500:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                description: HTTP status code
+              error:
+                type: string
+                description: Server error message
+              message:
+                type: string
+                description: Error message
+              timestamp:
+                type: string
+                description: Time of the response
+          example:
+            statusCode: 500
+            error: Internal server error!
+            message: Problema interno no servidor, contatar suporte!
+            timestamp: 2024-08-05 14:00:00:00
+  schemas:
+    Customer:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Customer ID
+        name:
+          type: string
+          description: Customer name
+        cpf:
+          type: string
+          description: Customer CPF
+        birthday:
+          type: string
+          description: Customer birthday
+        gender:
+          type: string
+          enum:
+            - male
+            - female
+            - others
+            - not_provide
+          description: Customer gender
+        phone:
+          type: string
+          description: Customer phone number
+        address:
+          type: object
+          properties:
+            zipCode:
+              type: string
+              description: Zip code
+            street:
+              type: string
+              description: Street name
+            number:
+              type: integer
+              description: Street number
+            complement:
+              type: string
+              description: Address complement
+            neighborhood:
+              type: string
+              description: Neighborhood
+            city:
+              type: string
+              description: City
+            state:
+              type: string
+              description: State
+        profile:
+          type: object
+          properties:
+            photoUrl:
+              type: string
+              description: Profile photo URL
+            displayName:
+              type: string
+              description: Display name
+            email:
+              type: string
+              description: Email address
+            username:
+              type: string
+              description: Username
+        terms:
+          type: object
+          properties:
+            clubRegulations:
+              type: boolean
+              description: Acceptance of club regulations
+            termOfCommitment:
+              type: boolean
+              description: Acceptance of the term of commitment
+            privacyPolicy:
+              type: boolean
+              description: Acceptance of the privacy policy
+            optOutSms:
+              type: boolean
+              description: Acceptance of SMS notifications
+            optOutEmail:
+              type: boolean
+              description: Acceptance of email notifications
+            optOutApp:
+              type: boolean
+              description: Acceptance of app notifications
+    NewCustomer:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Customer name
+        cpf:
+          type: string
+          description: Customer CPF
+        birthday:
+          type: string
+          description: Customer birthday
+        genero:
+          type: string
+          enum:
+            - male
+            - female
+            - others
+            - not_provide
+          description: Customer gender
+        phone:
+          type: string
+          description: Customer phone number
+        address:
+          type: object
+          properties:
+            zipCode:
+              type: string
+              description: Zip code
+            street:
+              type: string
+              description: Street name
+            number:
+              type: integer
+              description: Street number
+            complement:
+              type: string
+              description: Address complement
+            neighborhood:
+              type: string
+              description: Neighborhood
+            city:
+              type: string
+              description: City
+            state:
+              type: string
+              description: State
+        profile:
+          type: object
+          properties:
+            photoUrl:
+              type: string
+              description: Profile photo URL
+            displayName:
+              type: string
+              description: Display name
+            email:
+              type: string
+              description: Email address
+            username:
+              type: string
+              description: Username
+            password:
+              type: string
+              description: User password
+        terms:
+          type: object
+          properties:
+            clubRegulations:
+              type: boolean
+              description: Acceptance of club regulations
+            termOfCommitment:
+              type: boolean
+              description: Acceptance of the term of commitment
+            privacyPolicy:
+              type: boolean
+              description: Acceptance of the privacy policy
+            optOutSms:
+              type: boolean
+              description: Acceptance of SMS notifications
+            optOutEmail:
+              type: boolean
+              description: Acceptance of email notifications
+            optOutApp:
+              type: boolean
+              description: Acceptance of app notifications
+    Shop:
+      type: object
+      properties:
+        id:
+          type: number
+          description: Shop ID
+        document:
+          type: number
+          description: Shop document number
+        name:
+          type: string
+          description: Shop name
+        address:
+          type: object
+          properties:
+            cep:
+              type: string
+              description: Zip code
+            publicPlace:
+              type: string
+              description: Street name
+            number:
+              type: string
+              description: Street number
+            complement:
+              type: string
+              description: Address complement
+            neighborhood:
+              type: string
+              description: Neighborhood
+            city:
+              type: string
+              description: City
+            state:
+              type: string
+              description: State
+        phone:
+          type: string
+          description: Shop phone number
+        observations:
+          type: string
+          description: Shop observations
+    Product:
+      type: object
+      properties:
+        id:
+          type: number
+          description: Product ID
+        code:
+          type: number
+          description: Product code
+        description:
+          type: string
+          description: Product description
+        category:
+          type: object
+          properties:
+            code:
+              type: number
+              description: Category code
+            description:
+              type: string
+              description: Category description
+        typeOffer:
+          type: string
+          description: Type of offer
+        price:
+          type: object
+          properties:
+            from:
+              type: number
+              description: Original price
+            to:
+              type: number
+              description: Discounted price
+        offerDate:
+          type: object
+          properties:
+            from:
+              type: string
+              description: Offer start date
+            to:
+              type: string
+              description: Offer end date
+        discount:
+          type: number
+          description: Discount amount
